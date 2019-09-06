@@ -1,0 +1,7 @@
+FE9U?
+
+Chapter State struct:
+	+B4 | Some object
+		// +000 | word[0x60] | 
+		+180 | word[0x60] | string hashes (see below)
+		+300 | bits[0x60] | 

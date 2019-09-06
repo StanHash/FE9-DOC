@@ -1,0 +1,8 @@
+FE9U
+
+std::string!
+
+std::string struct: (no SSO :/)
+	+00 | word | size
+	+04 | word | capacity
+	+08 | word | address of allocated area

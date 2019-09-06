@@ -1,0 +1,375 @@
+I want to do the same as I did for mary, which is decompile
+Maybe I want to do it in a simpler way so that I don't get lost halfway through this time
+
+What follows is me messing around with in/out scenarios.
+
+{
+  L0000:  ref 0
+  L0002:  string "PID_IKE"
+  L0005:  call UnitGetByPID, 1
+  L0009:  store
+  L000A:  val 0
+  L000C:  string "IID_IRONSWORD"
+  L000F:  call UnitAddItem, 2
+  L0013:  disc
+  L0014:  val 0
+  L0016:  string "IID_IRONSWORD"
+  L0019:  call UnitAddItem, 2
+  L001D:  disc
+  L001E:  val 0
+  L0020:  string "IID_IRONSWORD"
+  L0023:  call UnitAddItem, 2
+  L0027:  disc
+  L0028:  num 0
+  L002A:  ret
+}
+
+{
+	push [0] = UnitGetByPID("PID_IKE");
+	UnitAddItem([0], "IID_IRONSWORD");
+	UnitAddItem([0], "IID_IRONSWORD");
+	UnitAddItem([0], "IID_IRONSWORD");
+	return 0;
+}
+
+{
+  L0000:  string "持ち物デモ"
+  L0003:  call get, 1
+  L0007:  not
+  L0008:  bn L0029
+  L000B:  num 14
+  L000D:  call TutorialUnlock, 1
+  L0011:  disc
+  L0012:  call Normal, 0
+  L0016:  bn L0021
+  L0019:  string "MT_C02_s交換"
+  L001C:  call TutShow, 1
+  L0020:  disc
+  L0021:  string "持ち物デモ"
+  L0024:  call set, 1
+  L0028:  disc
+  L0029:  num 0
+  L002B:  ret
+}
+
+{
+	if (!get("持ち物デモ"))
+	{
+		TutorialUnlock(14);
+
+		if (Normal())
+		{
+			TutShow("MT_C02_s交換");
+		}
+
+		set("持ち物デモ");
+	}
+}
+
+{
+  L0000:  string "gf_complete"
+  L0003:  call get, 1
+  L0007:  bky L0011
+  L000A:  string "gf_gameover"
+  L000D:  call get, 1
+  L0011:  bn L0017
+  L0014:  num 0
+  L0016:  ret
+  L0017:  string "ボス戦闘会話"
+  L001A:  call get, 1
+  L001E:  bkn L0029
+  L0021:  string "グレイル頑張るではないか"
+  L0024:  call get, 1
+  L0028:  not
+  L0029:  bn L003C
+  L002C:  string "MS_01_EV_05"
+  L002F:  call TalkEvent, 1
+  L0033:  disc
+  L0034:  string "グレイル頑張るではないか"
+  L0037:  call set, 1
+  L003B:  disc
+  L003C:  num 0
+  L003E:  ret
+}
+
+{
+	if (get("gf_complete") || get("gf_gameover"))
+	{
+		return 0;
+	}
+
+	if (get("ボス戦闘会話") && !get("グレイル頑張るではないか"))
+	{
+		TalkEvent("MS_01_EV_05");
+		set("グレイル頑張るではないか");
+	}
+}
+
+{
+  L0000:  call Maniac, 0
+  L0004:  bn L000A
+  L0007:  num 0
+  L0009:  ret
+  L000A:  string "gf_complete"
+  L000D:  call get, 1
+  L0011:  byk L001B
+  L0014:  string "gf_gameover"
+  L0017:  call get, 1
+  L001B:  bn L0021
+  L001E:  num 0
+  L0020:  ret
+  L0021:  ref 0
+  L0023:  call MindGetMe, 0
+  L0027:  store
+  L0028:  ref 1
+  L002A:  string "PID_IKE"
+  L002D:  call UnitGetByPID, 1
+  L0031:  store
+  L0032:  val 0
+  L0034:  val 1
+  L0036:  eq
+  L0037:  bn L007D
+  L003A:  string "ボーレ死亡"
+  L003D:  call get, 1
+  L0041:  not
+  L0042:  bn L007D
+  L0045:  ref 0
+  L0047:  string "PID_BOLE_MAP1"
+  L004A:  call UnitGetByPID, 1
+  L004E:  store
+  L004F:  disc
+  L0050:  ref 2
+  L0052:  val 0
+  L0054:  call UnitGetX, 1
+  L0058:  store
+  L0059:  ref 3
+  L005B:  val 0
+  L005D:  call UnitGetY, 1
+  L0061:  store
+  L0062:  gval 2
+  L0064:  val 2
+  L0066:  ne
+  L0067:  byk L006F
+  L006A:  gval 3
+  L006C:  val 3
+  L006E:  ne
+  L006F:  bn L007A
+  L0072:  string "MS_01_EV_07_03"
+  L0075:  call TalkEvent, 1
+  L0079:  disc
+  L007A:  num 0
+  L007C:  ret
+  L007D:  num 0
+  L007F:  ret
+}
+
+{
+	if (Maniac())
+		return 0;
+
+	if (get("gf_complete") || get("gf_gameover"))
+		return 0;
+
+	push [0] = MindGetMe();
+	push [1] = UnitGetByPID("PID_IKE");
+
+	if ([0] == [1])
+	{
+		if (!get("ボーレ死亡"))
+		{
+			[0] = UnitGetByPID("PID_BOLE_MAP1");
+			push [2] = UnitGetX([0]);
+			push [3] = UnitGetY([0]);
+
+			if (([@2] != [2]) || ([@3] != [3]))
+			{
+				TalkEvent("MS_01_EV_07_03");
+				return 0;
+			}
+
+			return 0;
+		}
+	}
+}
+
+{
+  L0000:  string "木刀捨てイベント起きたターン"
+  L0002:  call clr, 1
+  L0006:  disc
+  L0007:  ref 0
+  L0009:  string "PID_IKE"
+  L000C:  call UnitGetByPID, 1
+  L0010:  store
+  L0011:  val 0
+  L0013:  call UnitGetWeaponCount, 1
+  L0017:  num 0
+  L0019:  eq
+  L001A:  bn L0136
+  L001D:  ref 1
+  L001F:  val 0
+  L0021:  call UnitGetX, 1
+  L0025:  store
+  L0026:  ref 2
+  L0028:  val 0
+  L002A:  call UnitGetY, 1
+  L002E:  store
+  L002F:  call CopyMapCamera, 0
+  L0033:  disc
+  L0034:  num 0
+  L0036:  call SetOutLink, 1
+  L003A:  disc
+  L003B:  num 7
+  L003D:  num 250
+  L0040:  call Fade, 2
+  L0044:  disc
+  L0045:  num 1
+  L0047:  call WaitF, 1
+  L004B:  disc
+  L004C:  string "PID_MIST"
+  L004F:  call InstantUnitFocusByPID, 1
+  L0053:  disc
+  L0054:  num 15
+  L0056:  neg
+  L0057:  num 55
+  L0059:  num 14
+  L005B:  call InstantSetMapCamera, 3
+  L005F:  disc
+  L0060:  num 15
+  L0062:  neg
+  L0063:  num 55
+  L0065:  num 12
+  L0067:  call SetMapCamera, 3
+  L006B:  disc
+  L006C:  call FadeWait, 0
+  L0070:  disc
+  L0071:  call FocusHardWait, 0
+  L0075:  disc
+  L0076:  string "MS_01_EV_08_01"
+  L0079:  call TalkEvent, 1
+  L007D:  disc
+  L007E:  string "PID_MIST"
+  L0081:  val 1
+  L0083:  val 2
+  L0085:  call UnitMovePosByPID, 3
+  L0089:  disc
+  L008A:  call UnitMoveWait, 0
+  L008E:  disc
+  L008F:  string "PID_MIST"
+  L0092:  string "PID_IKE"
+  L0095:  num 270
+  L0098:  call UnitRotateToUnitByPID, 3
+  L009C:  disc
+  L009D:  string "PID_IKE"
+  L00A0:  string "PID_MIST"
+  L00A3:  num 270
+  L00A6:  call UnitRotateToUnitByPID, 3
+  L00AA:  disc
+  L00AB:  call UnitMoveWait, 0
+  L00AF:  disc
+  L00B0:  string "MS_01_EV_08_02"
+  L00B3:  call TalkEvent, 1
+  L00B7:  disc
+  L00B8:  call DisableSkip, 0
+  L00BC:  disc
+  L00BD:  call Comeback, 0
+  L00C1:  bn L00DB
+  L00C4:  string "PID_IKE"
+  L00C7:  call InstantUnitFocusByPID, 1
+  L00CB:  disc
+  L00CC:  num 2
+  L00CE:  num 250
+  L00D1:  call Fade, 2
+  L00D5:  disc
+  L00D6:  call FadeWait, 0
+  L00DA:  disc
+  L00DB:  val 0
+  L00DD:  string "IID_PRACTICESWORD"
+  L00E0:  call UnitGetItemShowing, 2
+  L00E4:  disc
+  L00E5:  call EnableSkip, 0
+  L00E9:  disc
+  L00EA:  num 250
+  L00ED:  call WaitM, 1
+  L00F1:  disc
+  L00F2:  call UnitFocusOff, 0
+  L00F6:  disc
+  L00F7:  num 4
+  L00F9:  call UnitWalkDir, 1
+  L00FD:  disc
+  L00FE:  string "PID_MIST"
+  L0101:  num 5
+  L0103:  num 2
+  L0105:  call UnitMovePosByPID, 3
+  L0109:  disc
+  L010A:  call UnitMoveWait, 0
+  L010E:  disc
+  L010F:  num 0
+  L0111:  call UnitWalkDir, 1
+  L0115:  disc
+  L0116:  call PastMapCamera, 0
+  L011A:  disc
+  L011B:  call FocusHardWait, 0
+  L011F:  disc
+  L0120:  num 250
+  L0123:  call WaitM, 1
+  L0127:  disc
+  L0128:  num 1
+  L012A:  call SetOutLink, 1
+  L012E:  disc
+  L012F:  string "木刀捨てイベント起きたターン"
+  L0131:  call set, 1
+  L0135:  disc
+  L0136:  num 0
+  L0138:  ret
+}
+
+{
+	clr("木刀捨てイベント起きたターン");
+
+	push [0] = UnitGetByPID("PID_IKE");
+
+	if (UnitGetWeaponCount([0]) == 0)
+	{
+		push [1] = UnitGetX([0]);
+		push [2] = UnitGetY([0]);
+
+		CopyMapCamera();
+		SetOutLink(0);
+		Fade(7, 250);
+		WaitF(1);
+		InstantUnitFocusByPID("PID_MIST");
+		InstantSetMapCamera(-15, 55, 14);
+		SetMapCamera(-15, 55, 12);
+		FadeWait();
+		FocusHardWait();
+		TalkEvent("MS_01_EV_08_01");
+		UnitMovePosByPID("PID_MIST", 1, 2);
+		UnitMoveWait();
+		UnitRotateToUnitByPID("PID_MIST", "PID_IKE", 270);
+		UnitRotateToUnitByPID("PID_IKE", "PID_MIST", 270);
+		UnitMoveWait();
+		TalkEvent("MS_01_EV_08_02");
+		DisableSkip();
+
+		if (Comeback())
+		{
+			InstantUnitFocusByPID("PID_IKE");
+			Fade(2, 250);
+			FadeWait();
+		}
+
+		UnitGetItemShowing([0], "IID_PRACTICESWORD");
+		EnableSkip();
+		WaitM(250);
+		UnitFocusOff();
+		UnitWalkDir(4);
+		UnitMovePosByPID("PID_MIST", 5, 2);
+		UnitMoveWait();
+		UnitWalkDir(1);
+		PastMapCamera();
+		FocusHardWait();
+		WaitM(250);
+		SetOutLink(1);
+		set("木刀捨てイベント起きたターン");
+	}
+}

@@ -1,0 +1,9 @@
+
+
+GameData struct:
+	+00 | byte[4?] | ?
+	+08 | byte[4?] | bonus levels?
+	+0C | byte[4?] | ?
+	+10 | byte[4?] | ?
+	+14 | byte[4?] | ?
+	+18 | byte[4?] | ?

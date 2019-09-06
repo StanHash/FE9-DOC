@@ -1,0 +1,40 @@
+FE9U?
+
+At 802F04E0 there's an array of a lot of the following struct
+
+struct: (sizeof() == 0x7C)
+	+00 | char[] | normalized path cstring
+	+2C | word   | hash37 of normalized path
+	+30 | short  | flags
+		bit 14 | has children? TODO: investigate
+	+32 | short  | some count
+	+34 | word   | last used time (in quarter seconds?)
+	+38 | word   | address of data
+
+Path normalization:
+	(one) leading '/' is removed.
+	All uppercase characters are converted to lowercase.
+
+At 802ADB20+8 is an array of hash table buckets, which are just pointers to those:
+	+00 | word | address of data
+	+04 | word | hash31 of identifying string
+
+cstr hashing function: (function at 8000D598, also inlined at multiple other locations)
+	int hash37(const char* cstr)
+	{
+		int result = 0;
+
+		while (*cstr)
+			result = result * 37 + *cstr++;
+
+		return result;
+	}
+
+	hash31 is the same exact function with the constant 37 being replaced by 31.
+
+Getting bucket id function: (I don't really know why that works but I tested it and it does)
+	int get_bucket(const u32 hash37)
+	{
+		static const u32 magic = 0x80C121B3u;
+		return hash - (((u64)hash * magic) >> 40u) * 509u;
+	}

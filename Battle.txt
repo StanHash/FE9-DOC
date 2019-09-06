@@ -1,0 +1,6 @@
+FE9U
+
+
+BattleAction struct: (sizeof(BattleAction) == 4)
+	+00 | byte  | action identifier
+	+02 | short | action-dependent value

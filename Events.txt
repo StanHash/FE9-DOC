@@ -1,0 +1,60 @@
+FE9U
+
+See also: Markdown/Events.md
+
+EventCaller proc struct:
+	+00 | proc header...
+	+30 | word | address of next event info to check
+	+34 | word | some event kind maybe? compared to EventInfo+0C
+	+38 | word | event check function address. Sig: s8(*)(EventInfo*)
+
+Event proc struct:
+	+00 | proc header...
+	+30 | word | address of EventInfo
+
+Event script state:
+	+00 | word | address of allocated VM memory
+	+0C | word | script cursor
+	+18 | word | stack pointer
+
+BIG NOTE:
+	in the Script/Cxx.cmb files, addresses are little-endian offset within the file
+	when loaded in RAM, however, they get converted to big-endian pointers (byteswapped and the added to the address of the file itself).
+
+ScriptInfo struct / Script/Cxx.cmb file format:
+	+00 | char[4] | "cmb\0"?
+	+04 | char[4] | "Cxx\0"?
+	+08 | char[4] | "cmb\0"?
+	...
+	+20 | short   | offset in some memory? (overwritten post-load)
+	+22 | short   | size of some memory?
+	+24 | word    | address of string pool
+	+28 | word    | address of EventInfo address array
+
+EventInfo struct:
+	+00 | word     | address of a identifier string
+	+04 | word     | address of script (function for Event functions)
+	+08 | word     | address of parent ScriptInfo (0 for Event functions)
+	+0C | byte     | kind (see below)
+	+0D | byte     | argument count (for callable events)
+	+0E | byte     | parameter count
+	+10 | short    | index (used for iteration)
+	+12 | short    | variable count (including arguments!)
+	+14 | short[?] | parameters
+
+Event kind enum and parameters:
+	0 = ?
+	1, 2 = ?
+		[0] | offset in string pool at [ScriptInfo+24]
+	3, 6 = turn event
+		[0] | turn start?
+		[1] | turn end?
+		[2] | phase faction
+
+Event script:
+	Series of bytes.
+	First bytes is instruction id
+	Next is *big-endian* operand if any (size depends on instruction)
+	Instruction 0x38 ("call named") is special in that it takes two operands (first 2 bytes are offset in string pool for name, last byte is number of arguments, which is only used to determine how much to dislocate the stack when the game fails to find a named callable)
+	
+	Unlike all three GBAFE games, event scripts here have a minimalistic set of basic instructions, and it is entirely stack based (most instructions push/pop from a stack). Also it directly messes with pointers (altho it is unsure whether this is part of their original script language design or just the implementation).

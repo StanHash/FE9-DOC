@@ -1,0 +1,4 @@
+FE9U
+
+I don't get what r13 is supposed to be exactly? But it seems to be used quite a bit to hold persistent data?
+There's probably some section or something (COMMON?) that got translated to r13 usage at compilation.

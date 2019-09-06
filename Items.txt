@@ -1,0 +1,26 @@
+FE9U
+
+Item struct:
+	+00      | word | address of ItemInfo
+	+04      | byte | uses
+	+05+0bit | 6bit | forge id (0 for none)
+	+05+6bit | 1bit | is droppable?
+	+05+7bit | 1bit | is equipped
+
+ItemInfo struct:
+	+1A | byte  | hit
+	+1C | byte  | crit
+	+38 | dword | attributes?
+	...
+
+Item attributes:
+	bit 4 (0x10) = ?
+	bit 7 (0x80) = reverses weapon triangle
+	bit 8 (0x100) = unbreakable?
+	bit 14 (0x4000) = prevents opponent from critting?
+
+Forge data: (array at 803206EC)
+	+10 | byte | might bonus
+	+11 | byte | hit bonus (in increments of 5)
+	+12 | byte | crit bonus (in increments of 3)
+	+13 | byte | weight *malus*

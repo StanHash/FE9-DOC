@@ -1,0 +1,41 @@
+FE9U
+
+Unit struct:
+	+000 | short | ?
+	+002 | byte  | ?
+	+003 | byte  | ?
+	+004 | float | ?
+	+008 | float | ?
+	+00C | float | ?
+	+010 | float | ?
+	+014 | float | ?
+	+018 | float | ?
+	+01C | some struct
+	... (this is all probably display stuff I don't understand)
+	+180 | word  | address of prev unit
+	+184 | word  | address of next unit
+	+188 | word  | address of CharacterInfo
+	+18C | word  | address of ClassInfo
+	+190 | word  | address of Faction
+	+194 | word  | address of resuce Unit (probably)
+	+198 | ? ...
+	+19E | byte  | map x (probably)
+	+19F | byte  | map y (probably)
+	+1A0 | word  | state bits
+	+1A4 | short | ?
+	+1A6 | short | ?
+	+1A8 | byte  | ?
+	+1A9 | byte  | exp?
+	+1AA | byte  | level?
+	+1AB | byte  | max hp gained?
+	+1AC | byte  | strength gained
+	+1AD | byte  | magic gained
+	+1AE | byte  | skill gained
+	+1AF | byte  | speed gained
+	+1B0 | byte  | luck gained
+	+1B1 | byte  | defense gained
+	+1B2 | byte  | resistance gained
+	...
+	+1BC | 128bits | skillset
+	+1CC | Item[4] | weapons
+	+1EC | Item[4] | items

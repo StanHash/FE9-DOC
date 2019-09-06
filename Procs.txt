@@ -1,0 +1,97 @@
+Addresses are FE9U
+
+Ye good old ~~6C~~ 70 structs.
+
+Proc struct: (sizeof(proc) == 0x70)
+	+00 | word  | scrStart
+	+04 | word  | scrCursor
+	+08 | word  | onEnd (void(*)(proc*))
+	+0C | word  | onUnk (void(*)(proc*))
+	+10 | word  | onLoop (void(*)(proc*))
+	+14 | word  | name (const char*)
+	+18 | word  | parent
+	+1C | word  | child
+	+20 | word  | prev
+	+24 | word  | next
+	+28 | short | loopCnt
+	+2A | byte  | unk2A
+	+2B | byte  | unk2B
+	+2C | byte  | flags
+	+2D | byte  | lockCnt
+	+2E | byte  | unk2E
+	+2F | user...
+
+Proc flags:
+	bit 0 | 
+	bit 1 | locking parent
+	bit 2 | 
+	bit 5? | this proc is not essential and can be discarded to make room for more
+		TODO: does `rlwinm. r0, r0, 0, 27, 27` check for bit 5?
+
+Proc instructions:
+	Unlike for GBAFE procs, FE9 proc instructions have variable length.
+
+	Proc instruction header word:
+		+24bit | 8bit  | instruction id (within dict)
+		+20bit | 4bit  | instruction dict id
+		+16bit | 4bit  | instruction size (in increments of 4 bytes)
+		+00bit | 16bit | meaning depends on instruction (see below)
+
+	I will be identifying proc instructions via the upper hw of this header word.
+
+	PROC INSTRUCTION DICTS:
+		One of the new features of this upgraded proc engine is the ability to register multiple proc "instruction dictionaries" (names are hard). One dict is simply a function pointer table indexed by instruction id. There is room for 9 (0-8) dicts to be registered at once, but the game only uses 3 (0-2).
+
+		dict 0 is at 80283828, and is registered automatically on proc system init
+		dict 1 is at 80284098
+		dict 2 is at 80288AA8
+
+		dict 0 instructions are reminescent of GBAFE proc instructions, but dict 1 and 2 seem to feature more specific stuff (TODO: investigate).
+
+	INSTRUCTIONS:
+		Identifier | StanName     | Details
+		0000       | End          | end
+		1001       | Label        | sets proc+2A (byte) (label? low hw is identifier?)
+		1002       | Unk002       | sets proc+2B (byte)
+		2003       | Name         | name, next word is name cstring address
+		2004       | OnEnd        | sets onEnd, next word is onEnd function address
+		2005       | Unk005       | sets proc+0C (word)
+		1006       | Unk006       | sets flag bit 2
+		1007       | UniqueWeak   | force proc uniqueness (weak: this proc gets discarded if any other proc runs the same scr)
+		1008       | UniqueStrong | force proc uniqueness (strong: discarded any other proc running the same scr)
+		1009       | Nop009       | no-op
+		100A       | Unk00A       | sets onLoop to nullsub if low hw is non-zero (bugged)
+		100B       | Unk00B       | sets onLoop to nullsub (bugged)
+		?00C       | Goto         | goes to label, low hw is identifier
+		?00D       | Loop         | goes to label if loopCnt > 0, decrements loopCnt, low hw is identifier. Would be useful if not for the fact that it seems to fail to update the instruction pointer once it exits the loop :/
+		?00E       | ChangeScr    | Changes proc script (new proc script at next word). Sets both scrStart and scrCursor (as if started anew)
+		200F       | CallFunc     | Calls function (function at next word). Sig: void(*)(proc*)
+		2010       | GotoIfyFunc  | goes to label if function returns non-zero (low hw is label, next word is function). Sig: s8(*)(proc*)
+		2011       | GotoIfnFunc  | goes to label if function returns zero (low hw is label, next word is function). Sig: s8(*)(proc*)
+		2012       | CallFuncRety | Calls function, and stops proc execution until next frame if function returns zero (next word is function). Sig: s8(*)(proc*)
+		2013       | CallFuncRetn | Calls function, and stops proc execution until next frame if function returns non-zero (next word is function). Sig: s8(*)(proc*)
+		2014       | WhileFunc    | Calls function each frame until it returns zero (next word is function). Sig: s8(*)(proc*)
+		2015       | UntilFunc    | Calls function each frame until it returns non-zero (next word is function). Sig: s8(*)(proc*)
+		2016       | CallFuncSArg | Calls function with argument (next word is function, low hw is argument). Sig: void(*)(proc*, int)
+		3017       | CallFuncUnk  | Calls function with arguments? (second next word is function but also arguments?). May be bugged
+		3018       | CallFuncLArg | Calls function with argument (next word is function, second next word is argument). Sig: void(*)(proc*, int)
+		3019       | CallFunc2Arg | Calls function with arguments (next word is function, second next word is first argument, low hw is second argument). Sig: void(*)(proc*, int, int)
+		201A       | LoopFunc     | Sets onLoop to function (function is next word). Sig: void(*)(proc*)
+		101B       | LoopBegin    | Sets loopCnt, low hw is new loopCnt.
+		201C       | StartChild   | Starts child proc (script is next word)
+		201D       | StartBlockChild | Starts blocking child proc (struct is next word)
+		201E       | StartTopmost | Starts proc in given tree (script is next word, tree id is low hw)
+		201F       | WhileExists  | Holds proc execution while proc with given script exists (script is next word)
+		2020       | EndEach      | Ends all procs with given script (script is next word)
+		2021       | BreakEach    | Breaks (clears onLoop) all procs with given script (script is next word)
+		?022       | Block        | Holds proc execution indefinitely.
+		1023       | UnlockParent | If proc is blocking, frees parent of this procs' lock
+		2024       | WhileExistsNamed | Holds proc execution while proc with given name exists (name cstring address is next word)
+		2025       | EndNamed     | Ends proc with given name (name cstring address is next word)
+		2026       | BreakNamed   | Breaks proc with given name (name cstring address is next word)
+		1027       | Unk027       | Sets flag bit 5
+
+		3100       | Unk100       | ?
+		2101       | Unk101       | debug message display?
+		2102       | Unk102       | ?
+		...
