@@ -4,3 +4,12 @@ yeppy yep there's C++ in here, which means that there's some ABI stuff to clear 
 
 Thankfully it seems to me that this is all very similar to what I've already figured from Harvest Moon: Friends of Mineral Town (except it's PowerPC instead of ARM).
 HM-MFOMT C++ notes: https://github.com/StanHash/FOMT-DOC
+
+vtable refresher:
+	vtable header layout:
+		+00 | word | for mutiple inheritance; offset to add to the "inner" instance pointer to get the "full" object pointer
+		+04 | word | probably dummied-out rtti info
+
+	+08 and beyond is where the function pointers lie.
+
+	When layout out vtables around the doc, I'll omit that part (it's almost always going to be two zeroes anyway) and only keep the function pointers.

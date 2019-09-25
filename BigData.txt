@@ -2,7 +2,7 @@ FE9U?
 
 At 802F04E0 there's an array of a lot of the following struct
 
-struct: (sizeof() == 0x7C)
+FileEntry struct: (sizeof() == 0x7C)
 	+00 | char[] | normalized path cstring
 	+2C | word   | hash37 of normalized path
 	+30 | short  | flags
@@ -10,6 +10,13 @@ struct: (sizeof() == 0x7C)
 	+32 | short  | some count
 	+34 | word   | last used time (in quarter seconds?)
 	+38 | word   | address of data
+
+Flags:
+	(flags & C00):
+		C00 = cmp file
+		800 = pak file
+		400 = cms file
+	& 400 = cms file
 
 Path normalization:
 	(one) leading '/' is removed.

@@ -1,7 +1,13 @@
 
+See also:
+- [My FE9 notes repository](https://github.com/StanHash/FE9-DOC).
+- [Rubbish FE9 script dumper](https://github.com/StanHash/FE9-DOC/blob/master/Tools/Py/script_anal.py).
+
 # FE9 event scripts doc/notes
 
 As usual, I decided to not do the other things I was working and do something else again. This time, I felt like checking out FE9. Fun fact: FE9 has procs too, and they're better than GBAFE procs. It also has vtables and other C++ shenanigans. Also PowerPC is horrible and ARM is so much more reader friendly... but I digress. Here we're about them event scripts.
+
+I usually don't post about my wip and/or smaller work but I felt like this would probably be interesting to some so this is kind of an exception. But be warned: This is fresh and wip.
 
 ## CMB files
 
@@ -641,5 +647,3 @@ Here's a big dump of all functions that are at some point registered as being ca
 	801B7094 0 GetDiedPlayerCount
 
 </details>
-
-

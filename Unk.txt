@@ -1,0 +1,28 @@
+FE9U
+
+ObjectA struct layout:
+	+00 | word | ?
+	+04 | word | ?
+	+08 | word | ?
+	+0C | word | ?
+	+10 | word | vtable (8028DFE8)
+
+ObjectB struct layout:
+	+00 | ObjectA (vtable: 8028E200)
+	+10 | word | 
+	+14 | std::string (filename?)
+	+20 | word | ?
+	+24 | word | ?
+	...
+	+30 | std::string
+	+3C | byte | ?
+	+3D | byte | ?
+	...
+	+40 | word | ?
+	+44 | word | ?
+
+ObjectA vtable layout:
+	+08 | void (?)(void);
+	+1C | void (?)(void);
+	+34 | int  (?)(int);
+	+38 | void (?)(std::string*);

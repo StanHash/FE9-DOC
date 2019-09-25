@@ -83,7 +83,7 @@ SCR_OPCODES = {
 	# jumps and calls
 	0x37: ("call",   1), # call event by id
 	0x38: ("call",   3), # call named
-	0x39: ("ret",    0), # return (end)
+	0x39: ("ret",    0), # pops and return (end)
 	0x3A: ("b",      2), # branch
 	0x3B: ("by",     2), # branch if true
 	0x3C: ("bky",    2), # branch and keep if true
@@ -92,10 +92,30 @@ SCR_OPCODES = {
 	0x3F: ("yield",  0), # yield
 
 	# debug (dummied)
-	0x40: ("dbgunk", 4), # no-op (dummied)
-	0x41: ("printf", 1), # calls printf (which is dummied)
+	0x40: ("unkdbg", 4), # no-op (dummied)
+	0x41: ("printf", 1), # calls printf (which is dummied) (FE10: no-op (dummied))
+
+	# FE10 only
+	0x42: ("inc",    0), # pops addr and increments word at addr
+	0x43: ("dec",    0), # pops addr and decrements word at addr
+	0x44: ("dup",    0), # pushes topmost stack value (effectively duplicating it)
+	0x45: ("retn",   0), # return no, equivalent to (number 0, ret)
+	0x46: ("rety",   0), # return yes, equivalent to (number 1, ret)
+	0x47: ("assign", 0), # [addr@1] = num@0; equivalent to (store, disc)
 
 }
+
+def kind_str(kind, params):
+	if kind == 0:
+		return 'FUNC'
+
+	if kind == 3:
+		return 'TURN<{}>'.format(', '.join(str(i) for i in params))
+
+	if len(params) > 0:
+		return 'KIND{}<{}>'.format(kind, ', '.join(str(i) for i in params))
+
+	return 'KIND{}'.format(kind)
 
 def main(args):
 	try:
@@ -136,15 +156,31 @@ def main(args):
 			offScr  = read_int(f, 4)
 			read_int(f, 4) # reserved space
 			kind = read_int(f, 1)
+			argcnt = read_int(f, 1)
+			paramcnt = read_int(f, 1)
+			read_int(f, 2) # index (should be same as num)
+			varcnt = read_int(f, 2)
+
+			params = []
+
+			f.seek(offEvent + 0x14)
+			for i in range(paramcnt):
+				params.append(read_int(f, 2))
 
 			if offName != 0:
 				f.seek(offName)
 				name = read_cstr(f)
 
-				print('EVENT {} [{:X}, {}] :: {}'.format(num, offEvent, kind, name))
-			
 			else:
-				print('EVENT {} [{:X}, {}]'.format(num, offEvent, kind))
+				name = 'unk_{}'.format(num)
+
+			print('{} {}({}) {}// id:{} off:{:X}'.format(
+				kind_str(kind, params),
+				name,
+				', '.join('arg_{}'.format(i) for i in range(argcnt)),
+				'global ' if offName != 0 else '',
+				num,
+				offEvent))
 
 			n = next_int(offEvent, offEvents)
 
@@ -171,23 +207,13 @@ def main(args):
 						stroff = (scrbytes[i] << 8) + scrbytes[i+1]
 						i = i + 2
 
-						errval = scrbytes[i]
+						callargs = scrbytes[i]
 						i = i + 1
 
 						f.seek(strpool + stroff)
 						name = read_cstr(f)
 
-						print('  L{:04X}:  call {}, {}'.format(locoff, name, errval))
-
-						continue
-					
-					if op == 0x39:
-						# ret special case
-
-						print('  L{:04X}:  ret'.format(locoff))
-
-						if i > nextlim:
-							break
+						print('  L{:04X}:  call {}, {}'.format(locoff, name, callargs))
 
 						continue
 
@@ -200,12 +226,32 @@ def main(args):
 							operand = (operand << 8) + scrbytes[i]
 							i = i + 1
 
+						if op == 0x37:
+							# call local special case
+							# FE10 only behavior
+
+							if (operand & 0x80) != 0:
+								operand = ((operand << 8) & 0x7F) + scrbytes[i]
+								i = i + 1
+
 						if op >= 0x1C and op <= 0x1E:
 							# string special case
 
 							f.seek(strpool + operand)
 							operand = "\"{}\"".format(read_cstr(f))
+
+						if op >= 0x01 and op <= 0x0C:
+							# local variable reference special case
 							
+							if operand < argcnt:
+								operand = "arg_{}".format(operand)
+
+							elif operand < varcnt:
+								operand = "var_{}".format(operand - argcnt)
+
+							else:
+								operand = "bad_{}".format(operand - varcnt)
+
 						if op >= 0x3A and op <= 0x3E:
 							if operand & 1 << (((opcode[1]*8)) - 1):
 								operand = -(((~operand)+1) & 0x7FFF);
@@ -221,6 +267,13 @@ def main(args):
 
 					else:
 						print("  L{:04X}:  {}".format(locoff, opcode[0]))
+
+					if op == 0x39 or op == 0x45 or op == 0x46:
+						# ret/retn/rety special case
+
+						if i > nextlim:
+							break
+
 
 
 if __name__ == '__main__':

@@ -5,8 +5,8 @@ See also: Markdown/Events.md
 EventCaller proc struct:
 	+00 | proc header...
 	+30 | word | address of next event info to check
-	+34 | word | some event kind maybe? compared to EventInfo+0C
-	+38 | word | event check function address. Sig: s8(*)(EventInfo*)
+	+34 | word | event kind to check
+	+38 | word | event check function address. Sig: bool(*)(EventInfo*)
 
 Event proc struct:
 	+00 | proc header...
@@ -43,9 +43,10 @@ EventInfo struct:
 	+14 | short[?] | parameters
 
 Event kind enum and parameters:
-	0 = ?
+	0 = callable?
 	1, 2 = ?
-		[0] | offset in string pool at [ScriptInfo+24]
+		[0] | offset in string pool at [ScriptInfo+24]. A flag name maybe
+	4 = area? in FE10 seems to be used for hidden treasure
 	3, 6 = turn event
 		[0] | turn start?
 		[1] | turn end?

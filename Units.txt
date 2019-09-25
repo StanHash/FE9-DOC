@@ -1,6 +1,12 @@
-FE9U
+FE9U/FE10E
 
-Unit struct:
+NOTE:
+	A "PID" is a character identifier (person? id)
+	A "JID" is a class identifier (job id)
+	A "SID" is a skill identifier (skill id)
+	A "FID" is a face (portrait) identifier (face id)
+
+FE9 Unit struct:
 	+000 | short | ?
 	+002 | byte  | ?
 	+003 | byte  | ?
@@ -12,22 +18,26 @@ Unit struct:
 	+018 | float | ?
 	+01C | some struct
 	... (this is all probably display stuff I don't understand)
-	+180 | word  | address of prev unit
-	+184 | word  | address of next unit
+	+180 | word  | address of prev unit in faction's linked list (0 if first?)
+	+184 | word  | address of next unit in faction's linked list (0 if end)
 	+188 | word  | address of CharacterInfo
 	+18C | word  | address of ClassInfo
 	+190 | word  | address of Faction
 	+194 | word  | address of resuce Unit (probably)
-	+198 | ? ...
+	+198 | byte  | index in Unit Array
+	+199 | byte  | ?
+	+19A | byte  | level
+	+19B | byte  | exp
+	...
 	+19E | byte  | map x (probably)
 	+19F | byte  | map y (probably)
 	+1A0 | word  | state bits
 	+1A4 | short | ?
 	+1A6 | short | ?
-	+1A8 | byte  | ?
-	+1A9 | byte  | exp?
-	+1AA | byte  | level?
-	+1AB | byte  | max hp gained?
+	+1A8 | byte  | health (current)
+	+1A9 | byte  | ?
+	+1AA | byte  | ?
+	+1AB | byte  | health gained (max)
 	+1AC | byte  | strength gained
 	+1AD | byte  | magic gained
 	+1AE | byte  | skill gained
@@ -36,6 +46,34 @@ Unit struct:
 	+1B1 | byte  | defense gained
 	+1B2 | byte  | resistance gained
 	...
-	+1BC | 128bits | skillset
+	+1BC | 128bits | skillset (think of it as one big bitfield)
 	+1CC | Item[4] | weapons
 	+1EC | Item[4] | items
+
+FE9 Unit state bits:
+	bit 0  : force deployed?
+	bit 1  : cannot be moved in prep screen?
+	bit 3? : is dead?
+
+Faction struct:
+	+00 | word | first unit in linked list
+	+04 | word | leader unit?
+	+08 | byte | id?
+
+FE9 Faction id:
+	0 : blue?
+	5 : non-deployed blue?
+
+FE10 Unit struct:
+	+000 | short  | ?
+	...
+	+0E4 | word   | address of prev unit
+	+0E8 | word   | address of next unit
+	+0EC | word   | address of char info
+	+0F0 | word   | address of class info
+	+0F4 | word   | address of faction (struct)
+	+0F8 | word   | address of rescuing unit (unsure, assuming same as FE9)
+	+0FC | byte   | index (unsure, assuming same as FE9)
+	...
+	+108 | 64bits | unit state bits (unsure, seems to also be used for some skills, but this may be like "is using this skill" (like gamble) and not "has this skill")
+		hi 20 : parity? nihil?
