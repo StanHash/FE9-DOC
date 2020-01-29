@@ -1,0 +1,65 @@
+FE9U
+
+80107B54 may be the function that decodes the file data into a struct
+
+Dispos: (sizeof = 0x6C)
+	+00 | word    | pid string address
+	+04 | word    | jid string address
+	+08 | word    | ? (discarded?)
+	+0C | word[8] | iid string address array
+	+2C | word[5] | sid string address array
+	+40 | byte    | ? (discarded?)
+	+41 | byte    | ? (discarded?)
+	+42 | byte    | ? (discarded?)
+	+43 | byte    | hp gain
+	+44 | byte    | str gain
+	+45 | byte    | mag gain
+	+46 | byte    | skl gain
+	+47 | byte    | spd gain
+	+48 | byte    | lck gain
+	+49 | byte    | def gain
+	+4A | byte    | res gain
+	+4B | byte    | ? (goes to UnitInfo+64) (con perhaps?)
+	+4C | word    | ai? (goes to UnitInfo+38)
+	+50 | word    | ai? (goes to UnitInfo+3C)
+	+54 | word    | ai? (goes to UnitInfo+40)
+	+58 | word    | ai? (goes to UnitInfo+44)
+	+5C | byte    | x position
+	+5D | byte    | y position
+	+5E | byte    | ? (goes to UnitInfo+0D) (jespoke: x final)
+	+5F | byte    | ? (goes to UnitInfo+0E) (jespoke: y final)
+	+60 | byte    | level
+	+61 | byte    | ? (goes to UnitInfo+09)
+	+62 | byte    | autolevel flag? perhaps a bunch of other stuff too
+	+63 | byte    | ? (goes to UnitInfo+66)
+	+64 | byte[8] | item flags (bit 0: droppable, bit 1: ng+ only)
+
+The UnitInfo struct is what is passed to function at 8003EAE8, which loads a new unit.
+
+UnitInfo struct: (this is similar in structure to GBAFE "UNIT"s)
+	+00 | word     | pid string address
+	+04 | word     | jid string address (if 0, uses character's default)
+	+08 | byte     | autolevel flag?
+	+0A | byte     | level (if class matches default and default level is more than then, then this is ignored in favor of default level)
+	+0B | byte     | x position
+	+0C | byte     | y position
+	+0D | byte     | ?
+	+0E | byte     | ?
+	+10 | word[8]  | iid string address array (items to be loaded with)
+	+30 | byte[8]  | item flags (bit 0: droppable, bit 1: ng+ only)
+	+38 | word     | ai?
+	+3C | word     | ai?
+	+40 | word     | ai?
+	+44 | word     | ai?
+	+48 | word[5?] | sid string address array (skills to be loaded with)
+	+5C | byte     | initial hp gain
+	+5D | byte     | initial str gain
+	+5E | byte     | initial mag gain
+	+5F | byte     | initial skl gain
+	+60 | byte     | initial spd gain
+	+61 | byte     | initial lck gain
+	+62 | byte     | initial def gain
+	+63 | byte     | initial res gain
+	+64 | byte     | ? (if non-zero and less than 20, goes to Unit+19C)
+	+65 | byte     | ?
+	+66 | byte     | ?
